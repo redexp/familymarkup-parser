@@ -9,27 +9,29 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[TokenName-0]
-	_ = x[TokenUnknown-1]
-	_ = x[TokenWord-2]
-	_ = x[TokenNum-3]
-	_ = x[TokenArrow-4]
-	_ = x[TokenEqual-5]
-	_ = x[TokenPunctuation-6]
-	_ = x[TokenPlus-7]
-	_ = x[TokenComma-8]
-	_ = x[TokenBracket-9]
-	_ = x[TokenBracketLeft-10]
-	_ = x[TokenBracketRight-11]
-	_ = x[TokenComment-12]
-	_ = x[TokenSpace-13]
-	_ = x[TokenEmptyLines-14]
-	_ = x[TokenNewLine-15]
-	_ = x[TokenInvalid-16]
+	_ = x[TokenSurname-1]
+	_ = x[TokenAlias-2]
+	_ = x[TokenUnknown-3]
+	_ = x[TokenWord-4]
+	_ = x[TokenNum-5]
+	_ = x[TokenArrow-6]
+	_ = x[TokenEqual-7]
+	_ = x[TokenPunctuation-8]
+	_ = x[TokenPlus-9]
+	_ = x[TokenComma-10]
+	_ = x[TokenBracket-11]
+	_ = x[TokenBracketLeft-12]
+	_ = x[TokenBracketRight-13]
+	_ = x[TokenComment-14]
+	_ = x[TokenSpace-15]
+	_ = x[TokenEmptyLines-16]
+	_ = x[TokenNewLine-17]
+	_ = x[TokenInvalid-18]
 }
 
-const _TokenType_name = "TokenNameTokenUnknownTokenWordTokenNumTokenArrowTokenEqualTokenPunctuationTokenPlusTokenCommaTokenBracketTokenBracketLeftTokenBracketRightTokenCommentTokenSpaceTokenEmptyLinesTokenNewLineTokenInvalid"
+const _TokenType_name = "TokenNameTokenSurnameTokenAliasTokenUnknownTokenWordTokenNumTokenArrowTokenEqualTokenPunctuationTokenPlusTokenCommaTokenBracketTokenBracketLeftTokenBracketRightTokenCommentTokenSpaceTokenEmptyLinesTokenNewLineTokenInvalid"
 
-var _TokenType_index = [...]uint8{0, 9, 21, 30, 38, 48, 58, 74, 83, 93, 105, 121, 138, 150, 160, 175, 187, 199}
+var _TokenType_index = [...]uint8{0, 9, 21, 31, 43, 52, 60, 70, 80, 96, 105, 115, 127, 143, 160, 172, 182, 197, 209, 221}
 
 func (i TokenType) String() string {
 	if i < 0 || i >= TokenType(len(_TokenType_index)-1) {

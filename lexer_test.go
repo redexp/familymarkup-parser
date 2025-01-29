@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"os"
 	"strings"
 	"testing"
 )
@@ -9,10 +8,33 @@ import (
 func TestLexer(t *testing.T) {
 	list := []Token{
 		{
+			Type:     TokenSurname,
+			Text:     "Fam",
+			Line:     0,
+			Char:     0,
+			CharsNum: 3,
+		},
+		{
+			Type:     TokenBracket,
+			SubType:  TokenBracketLeft,
+			Text:     "(",
+			Line:     0,
+			Char:     3,
+			CharsNum: 1,
+		},
+		{
+			Type:     TokenSurname,
+			SubType:  TokenAlias,
+			Text:     "Ali",
+			Line:     0,
+			Char:     4,
+			CharsNum: 3,
+		},
+		{
 			Type:     TokenEmptyLines,
 			Text:     "\n \n",
 			Line:     0,
-			Char:     0,
+			Char:     7,
 			CharsNum: 3,
 		},
 		{
@@ -32,6 +54,7 @@ func TestLexer(t *testing.T) {
 		},
 		{
 			Type:     TokenName,
+			SubType:  TokenAlias,
 			Text:     `P-1`,
 			Line:     2,
 			Char:     5,
@@ -47,6 +70,7 @@ func TestLexer(t *testing.T) {
 		},
 		{
 			Type:     TokenName,
+			SubType:  TokenAlias,
 			Text:     `P2`,
 			Line:     2,
 			Char:     7,
@@ -187,6 +211,108 @@ func TestLexer(t *testing.T) {
 			Char:     43,
 			CharsNum: 1,
 		},
+		{
+			Type:     TokenNewLine,
+			Text:     "\n",
+			Line:     3,
+			Char:     44,
+			CharsNum: 1,
+		},
+		{
+			Type:     TokenName,
+			Text:     "Name",
+			Line:     4,
+			Char:     0,
+			CharsNum: 4,
+		},
+		{
+			Type:     TokenSpace,
+			Text:     " ",
+			Line:     4,
+			Char:     4,
+			CharsNum: 1,
+		},
+		{
+			Type:     TokenBracket,
+			SubType:  TokenBracketLeft,
+			Text:     "(",
+			Line:     4,
+			Char:     5,
+			CharsNum: 1,
+		},
+		{
+			Type:     TokenName,
+			SubType:  TokenAlias,
+			Text:     "Al",
+			Line:     4,
+			Char:     6,
+			CharsNum: 2,
+		},
+		{
+			Type:     TokenPunctuation,
+			SubType:  TokenComma,
+			Text:     ",",
+			Line:     4,
+			Char:     8,
+			CharsNum: 1,
+		},
+		{
+			Type:     TokenBracket,
+			SubType:  TokenBracketRight,
+			Text:     ")",
+			Line:     4,
+			Char:     9,
+			CharsNum: 1,
+		},
+		{
+			Type:     TokenSurname,
+			Text:     "Sur",
+			Line:     4,
+			Char:     10,
+			CharsNum: 3,
+		},
+		{
+			Type:     TokenNewLine,
+			Text:     "\n",
+			Line:     4,
+			Char:     13,
+			CharsNum: 1,
+		},
+		{
+			Type:     TokenNum,
+			Text:     "1.",
+			Line:     5,
+			Char:     0,
+			CharsNum: 2,
+		},
+		{
+			Type:     TokenName,
+			Text:     "Name",
+			Line:     5,
+			Char:     2,
+			CharsNum: 4,
+		},
+		{
+			Type:     TokenSpace,
+			Text:     " ",
+			Line:     5,
+			Char:     6,
+			CharsNum: 1,
+		},
+		{
+			Type:     TokenSurname,
+			Text:     "Sur",
+			Line:     5,
+			Char:     7,
+			CharsNum: 3,
+		},
+		{
+			Type:     TokenInvalid,
+			Text:     "@%",
+			Line:     5,
+			Char:     10,
+			CharsNum: 2,
+		},
 	}
 
 	var b strings.Builder
@@ -214,4 +340,3 @@ func TestLexer(t *testing.T) {
 		}
 	}
 }
-

@@ -95,6 +95,7 @@ func Lexer(src string) (list []*Token) {
 	line := 0
 	chars := 0
 	var prev *Token
+	leftBracketOpen := false
 
 	for offset < length {
 		var token *Token
@@ -126,6 +127,7 @@ func Lexer(src string) (list []*Token) {
 				prev.Length += size
 				prev.Char++
 				prev.Text = src[prev.Offest:prev.End()]
+				token = prev
 			} else {
 				_, size := utf8.DecodeRuneInString(src[offset:])
 				token = &Token{
@@ -137,17 +139,39 @@ func Lexer(src string) (list []*Token) {
 					Text:   src[offset : offset+size],
 				}
 			}
-		} else if token.Type == TokenUnknown {
-			list = mergeUnknown(list, token, src)
-		} else if token.Type == TokenWord {
-			list = mergeWords(list, token, src)
-		} else if token.Type == TokenNewLine {
-			line++
-		} else if token.Type == TokenEmptyLines {
-			line += strings.Count(token.Text, "\n")
 		}
 
-		if token != nil {
+		switch token.Type {
+		case TokenName:
+			if leftBracketOpen {
+				token.SubType = TokenAlias
+			} else {
+				checkSurname(list, token)
+			}
+
+		case TokenUnknown:
+			list = mergeUnknown(list, token, src)
+
+		case TokenWord:
+			list = mergeWords(list, token, src)
+
+		case TokenBracket:
+			leftBracketOpen = token.SubType == TokenBracketLeft
+
+		case TokenNewLine:
+			line++
+
+		case TokenEmptyLines:
+			line += strings.Count(token.Text, "\n")
+
+			checkFamilyName(list)
+		}
+
+		if leftBracketOpen && (token.Type == TokenNewLine || token.Type == TokenEmptyLines) {
+			leftBracketOpen = false
+		}
+
+		if token != prev {
 			list = append(list, token)
 			prev = token
 		}
@@ -166,7 +190,7 @@ func mergeUnknown(list []*Token, token *Token, src string) []*Token {
 		return list
 	}
 
-	prevTokens, breakToken := getPrevTokens(list, count-1, []TokenType{TokenName, TokenWord})
+	prevTokens, breakToken := getPrevTokens(list, -1, []TokenType{TokenName, TokenWord})
 	prevCount := len(prevTokens)
 
 	if prevCount == 0 {
@@ -182,7 +206,7 @@ func mergeUnknown(list []*Token, token *Token, src string) []*Token {
 				count--
 			}
 
-			prevTokens = trimLeftToken(prevTokens[count:])
+			prevTokens = trimTokenLeft(prevTokens[count:], TokenSpace)
 		}
 	}
 
@@ -196,7 +220,7 @@ func mergeWords(list []*Token, token *Token, src string) []*Token {
 		return list
 	}
 
-	prevTokens, _ := getPrevTokens(list, count-1, []TokenType{TokenWord})
+	prevTokens, _ := getPrevTokens(list, -1, []TokenType{TokenWord})
 
 	return mergeTokens(list, prevTokens, token, src)
 }
@@ -219,11 +243,62 @@ func mergeTokens(list []*Token, prevTokens []*Token, token *Token, src string) [
 	return list[:len(list)-count]
 }
 
+func checkFamilyName(list []*Token) {
+	tokens, breakToken := getPrevTokens(list, -1, []TokenType{TokenName, TokenSurname, TokenBracket, TokenPunctuation, TokenInvalid})
+
+	if breakToken != nil && breakToken.Type != TokenEmptyLines {
+		return
+	}
+
+	for _, token := range tokens {
+		if token.Type == TokenPunctuation && token.SubType != TokenComma {
+			return
+		}
+	}
+
+	for _, token := range tokens {
+		if token.Type != TokenName {
+			continue
+		}
+
+		token.Type = TokenSurname
+	}
+}
+
+func checkSurname(list []*Token, token *Token) {
+	tokens, breakToken := getPrevTokens(list, -1, []TokenType{TokenName, TokenSurname})
+
+	for _, token := range tokens {
+		if token.Type == TokenSurname {
+			token.Type = TokenName
+		}
+	}
+
+	if len(tokens) > 0 {
+		token.Type = TokenSurname
+		return
+	}
+
+	if breakToken == nil || breakToken.SubType != TokenBracketRight {
+		return
+	}
+
+	tokens, _ = getPrevTokens(cutAliasesRight(list), -1, []TokenType{TokenName})
+
+	if len(tokens) > 0 {
+		token.Type = TokenSurname
+	}
+}
+
 func getPrevTokens(list []*Token, start int, validTokens []TokenType) ([]*Token, *Token) {
 	count := len(list)
 
 	if count == 0 {
 		return list, nil
+	}
+
+	if start < 0 {
+		start = count + start // count + (-1)
 	}
 
 	var index int
@@ -241,6 +316,10 @@ func getPrevTokens(list []*Token, start int, validTokens []TokenType) ([]*Token,
 			index++
 			break
 		}
+	}
+
+	if index < 0 {
+		index = 0
 	}
 
 	if index > start {
@@ -299,11 +378,41 @@ func getNextTokens(list []*Token, start int, validTokens []TokenType) []*Token {
 	return list[start : index+1]
 }
 
-func trimLeftToken(list []*Token) []*Token {
+func trimTokenLeft(list []*Token, t TokenType) []*Token {
 	count := len(list)
 
-	if count > 0 && list[0].Type == TokenSpace {
+	if count > 0 && list[0].Type == t {
 		return list[1:]
+	}
+
+	return list
+}
+
+func cutAliasesRight(list []*Token) []*Token {
+	right := false
+
+	for i := len(list) - 1; i >= 0; i-- {
+		token := list[i]
+		t := token.Type
+
+		if t == TokenSpace {
+			continue
+		} else if t == TokenNewLine || t == TokenEmptyLines {
+			return list
+		}
+
+		if !right {
+			if token.SubType != TokenBracketRight {
+				return list
+			}
+
+			right = true
+			continue
+		}
+
+		if token.SubType == TokenBracketLeft {
+			return list[:i]
+		}
 	}
 
 	return list

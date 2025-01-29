@@ -6,6 +6,8 @@ type TokenType int
 
 const (
 	TokenName TokenType = iota
+	TokenSurname
+	TokenAlias
 	TokenUnknown
 	TokenWord
 	TokenNum
