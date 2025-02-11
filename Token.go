@@ -1,11 +1,11 @@
 package parser
 
-//go:generate stringer -type=TokenType
+//go:generate stringer -type=TokenType,ErrType
 
 type TokenType int
 
 const (
-	TokenName TokenType = iota
+	TokenName TokenType = iota + 1
 	TokenSurname
 	TokenAlias
 	TokenUnknown
@@ -26,9 +26,16 @@ const (
 	TokenInvalid
 )
 
+type ErrType int
+
+const (
+	ErrUnexpected ErrType = iota + 1
+)
+
 type Token struct {
-	Type     TokenType
-	SubType  TokenType
+	Type    TokenType
+	SubType TokenType
+	ErrType
 	Offest   int
 	Length   int
 	Line     int

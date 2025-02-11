@@ -95,27 +95,30 @@ func Lexer(src string) (list []*Token) {
 	line := 0
 	chars := 0
 	var prev *Token
-	leftBracketOpen := false
+	leftOpen := false
 
 	for offset < length {
 		var token *Token
-		text := src[offset:]
+		offsetSrc := src[offset:]
 
 		for _, rule := range rules {
-			match := rule.Regexp.FindStringSubmatch(text)
+			match := rule.Regexp.FindStringSubmatch(offsetSrc)
 
 			if match == nil {
 				continue
 			}
 
+			text := match[0]
+
 			token = &Token{
-				Type:    rule.Type,
-				SubType: rule.SubType,
-				Offest:  offset,
-				Length:  len(match[0]),
-				Text:    match[0],
-				Line:    line,
-				Char:    chars,
+				Type:     rule.Type,
+				SubType:  rule.SubType,
+				Offest:   offset,
+				Length:   len(text),
+				Text:     text,
+				Line:     line,
+				Char:     chars,
+				CharsNum: utf8.RuneCountInString(text),
 			}
 
 			break
@@ -125,25 +128,27 @@ func Lexer(src string) (list []*Token) {
 			if prev != nil && prev.Type == TokenInvalid {
 				_, size := utf8.DecodeRuneInString(src[prev.Offest:prev.End()])
 				prev.Length += size
-				prev.Char++
+				prev.CharsNum++
 				prev.Text = src[prev.Offest:prev.End()]
+
 				token = prev
 			} else {
 				_, size := utf8.DecodeRuneInString(src[offset:])
 				token = &Token{
-					Type:   TokenInvalid,
-					Offest: offset,
-					Length: size,
-					Line:   line,
-					Char:   chars,
-					Text:   src[offset : offset+size],
+					Type:     TokenInvalid,
+					Offest:   offset,
+					Length:   size,
+					Line:     line,
+					Char:     chars,
+					CharsNum: 1,
+					Text:     src[offset : offset+size],
 				}
 			}
 		}
 
 		switch token.Type {
 		case TokenName:
-			if leftBracketOpen {
+			if leftOpen {
 				token.SubType = TokenAlias
 			} else {
 				checkSurname(list, token)
@@ -156,7 +161,7 @@ func Lexer(src string) (list []*Token) {
 			list = mergeWords(list, token, src)
 
 		case TokenBracket:
-			leftBracketOpen = token.SubType == TokenBracketLeft
+			leftOpen = token.SubType == TokenBracketLeft
 
 		case TokenNewLine:
 			line++
@@ -167,8 +172,19 @@ func Lexer(src string) (list []*Token) {
 			checkFamilyName(list)
 		}
 
-		if leftBracketOpen && (token.Type == TokenNewLine || token.Type == TokenEmptyLines) {
-			leftBracketOpen = false
+		if leftOpen {
+			switch token.Type {
+			case TokenName, TokenSurname, TokenBracket, TokenSpace, TokenWord, TokenInvalid:
+				// ok
+
+			case TokenPunctuation:
+				if token.SubType != TokenComma {
+					leftOpen = false
+				}
+
+			default:
+				leftOpen = false
+			}
 		}
 
 		if token != prev {
@@ -176,8 +192,13 @@ func Lexer(src string) (list []*Token) {
 			prev = token
 		}
 
+		if token.Type == TokenNewLine || token.Type == TokenEmptyLines {
+			chars = 0
+		} else {
+			chars = prev.EndChar()
+		}
+
 		offset = prev.End()
-		chars = prev.EndChar()
 	}
 
 	return
@@ -239,12 +260,19 @@ func mergeTokens(list []*Token, prevTokens []*Token, token *Token, src string) [
 	token.Line = first.Line
 	token.Char = first.Char
 	token.Text = src[token.Offest:token.End()]
+	token.CharsNum = utf8.RuneCountInString(token.Text)
 
 	return list[:len(list)-count]
 }
 
 func checkFamilyName(list []*Token) {
-	tokens, breakToken := getPrevTokens(list, -1, []TokenType{TokenName, TokenSurname, TokenBracket, TokenPunctuation, TokenInvalid})
+	tokens, breakToken := getPrevTokens(list, -1, []TokenType{TokenComment, TokenInvalid, TokenNewLine})
+
+	if breakToken == nil || breakToken.Type == TokenEmptyLines {
+		return
+	}
+
+	tokens, breakToken = getPrevTokens(list, -len(tokens)-1, []TokenType{TokenName, TokenSurname, TokenBracket, TokenPunctuation, TokenComment, TokenInvalid})
 
 	if breakToken != nil && breakToken.Type != TokenEmptyLines {
 		return

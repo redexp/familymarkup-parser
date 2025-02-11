@@ -1,0 +1,25 @@
+
+
+* root comment
+* root comment 2
+
+Family Unexpected (Alias, Alias2)
+* Family comment
+
+* Family comment 2
+
+Name + Name2
+
+  Name3 + Name4 = label # relation comment
+
+Name5 + mother? =
+Name6 (NameAlias) Surname # person comment
+Name7
+
+* Family comment 3
+
+  Family2 * Family2 comment
+
+unknown? + Name1
+* relation comment
+
