@@ -20,8 +20,10 @@ func TestParser(t *testing.T) {
 	root := Parser(text)
 
 	g.Expect(root).To(testPoint(Fields{
+		"Loc": testLoc(2, 0, 23, 19),
 		"Families": testArr(
 			testPoint(Fields{
+				"Loc":     testLoc(5, 0, 18, 19),
 				"Name":    testToken("Family"),
 				"Aliases": testTokens("Alias", "Alias2"),
 				"Comments": testTokens(
@@ -31,12 +33,14 @@ func TestParser(t *testing.T) {
 				),
 				"Relations": testArr(
 					testPoint(Fields{
+						"Loc": testLoc(10, 0, 10, 13),
 						"Sources": testPoint(Fields{
 							"Persons":    testPersons("Name", "Name2"),
 							"Separators": testTokens("+"),
 						}),
 					}),
 					testPoint(Fields{
+						"Loc": testLoc(12, 2, 12, 43),
 						"Sources": testPoint(Fields{
 							"Persons":    testPersons("Name3", "Name4"),
 							"Separators": testTokens("+"),
@@ -46,6 +50,7 @@ func TestParser(t *testing.T) {
 						"Comments": testTokens("# relation comment"),
 					}),
 					testPoint(Fields{
+						"Loc": testLoc(14, 0, 16, 6),
 						"Sources": testPoint(Fields{
 							"Persons":    testPersons("Name5", "mother?"),
 							"Separators": testTokens("+"),
@@ -68,19 +73,46 @@ func TestParser(t *testing.T) {
 				),
 			}),
 			testPoint(Fields{
+				"Loc":      testLoc(20, 2, 23, 19),
 				"Name":     testToken("Family2"),
 				"Comments": testTokens("* Family2 comment"),
 				"Relations": testArr(
 					testPoint(Fields{
 						"Sources": testPoint(Fields{
-							"Persons": testPersons("unknown?", "Name1"),
+							"Persons": testArr(
+								testPoint(Fields{
+									"Loc":     testLoc(22, 0, 22, 9),
+									"Unknown": testToken("unknown?"),
+								}),
+								testPoint(Fields{
+									"Loc":  testLoc(22, 11, 22, 17),
+									"Name": testToken("Name1"),
+								}),
+							),
+							"Separators": testTokens("+"),
 						}),
+						"Arrow":    BeNil(),
+						"Label":    BeNil(),
+						"Targets":  BeNil(),
 						"Comments": testTokens("* relation comment"),
 					}),
 				),
 			}),
 		),
 	}))
+}
+
+func testLoc(startLine, startChar, endLine, endChar int) M {
+	return testProps(Fields{
+		"Start": testProps(Fields{
+			"Line": BeNumerically("==", startLine),
+			"Char": BeNumerically("==", startChar),
+		}),
+		"End": testProps(Fields{
+			"Line": BeNumerically("==", endLine),
+			"Char": BeNumerically("==", endChar),
+		}),
+	})
 }
 
 func testProps(props Fields) M {

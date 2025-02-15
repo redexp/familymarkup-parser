@@ -6,6 +6,13 @@ func Parser(src string) *Root {
 
 func visitRoot(c *Cursor) *Root {
 	root := &Root{}
+	start := c.PickNext()
+
+	if start == nil {
+		return root
+	}
+
+	root.Start = toPos(start)
 
 	for token := range c.Iter() {
 		switch token.Type {
@@ -25,16 +32,20 @@ func visitRoot(c *Cursor) *Root {
 		}
 	}
 
+	root.End = toEndPos(c.PickPrev())
+
 	return root
 }
 
 func visitFamily(c *Cursor) (family *Family) {
 	family = &Family{}
+	family.Start = toPos(c.PickNext())
 
 	for token := range c.Iter() {
 		switch token.Type {
 		case TokenSurname:
 			if family.Name != nil {
+				family.End = toEndPos(c.PickPrevSkipCur())
 				return
 			}
 
@@ -70,13 +81,18 @@ func visitFamily(c *Cursor) (family *Family) {
 		}
 	}
 
+	family.End = toEndPos(c.PickPrev())
+
 	return
 }
 
 func visitRelation(c *Cursor) (rel *Relation) {
 	rel = &Relation{
-		Sources: &Persons{},
+		Sources: &RelList{},
 	}
+
+	rel.Start = toPos(c.PickNext())
+
 	list := rel.Sources
 
 	defer func() {
@@ -102,7 +118,7 @@ func visitRelation(c *Cursor) (rel *Relation) {
 			}
 
 			rel.Arrow = token
-			rel.Targets = &Persons{}
+			rel.Targets = &RelList{}
 			list = rel.Targets
 
 			tokens := c.GetAllNext([]TokenType{TokenSpace, TokenWord})
@@ -121,21 +137,26 @@ func visitRelation(c *Cursor) (rel *Relation) {
 				token.ErrType = ErrUnexpected
 				continue
 			}
+			rel.End = toEndPos(c.PickPrev())
 			return
 
 		case TokenSpace, TokenInvalid, TokenNewLine:
 			continue
 
 		default:
+			rel.End = toEndPos(c.PickPrevSkipCur())
 			return
 		}
 	}
 
+	rel.End = toEndPos(c.PickPrev())
 	return
 }
 
 func visitPerson(c *Cursor) (p *Person) {
 	p = &Person{}
+	p.Start = toPos(c.PickNext())
+
 	isStartOfLine := c.IsStartOfNewLine()
 
 	for token := range c.Iter() {
@@ -146,6 +167,7 @@ func visitPerson(c *Cursor) (p *Person) {
 				continue
 			}
 
+			p.End = toEndPos(c.PickPrevSkipCur())
 			return
 
 		case TokenNum:
@@ -185,10 +207,13 @@ func visitPerson(c *Cursor) (p *Person) {
 
 		case TokenNewLine:
 			if !isStartOfLine {
+				p.End = toEndPos(c.PickPrevSkipCur())
 				return
 			}
 
 			tokens := c.GetAllNext([]TokenType{TokenComment, TokenNewLine, TokenSpace})
+
+			p.End = toEndPos(c.PickPrev())
 
 			if len(tokens) > 0 {
 				c.Index++
@@ -206,9 +231,26 @@ func visitPerson(c *Cursor) (p *Person) {
 			continue
 
 		default:
+			p.End = toEndPos(c.PickPrevSkipCur())
 			return
 		}
 	}
 
+	p.End = toEndPos(c.PickPrev())
+
 	return
+}
+
+func toPos(token *Token) Position {
+	return Position{
+		Line: token.Line,
+		Char: token.Char,
+	}
+}
+
+func toEndPos(token *Token) Position {
+	return Position{
+		Line: token.Line,
+		Char: token.EndChar() + 1,
+	}
 }

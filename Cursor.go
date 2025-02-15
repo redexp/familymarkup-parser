@@ -51,6 +51,44 @@ func (c *Cursor) GetAllNext(validTokens []TokenType) (tokens []*Token) {
 	return
 }
 
+func (c *Cursor) PickClosestTextToken(dir int) *Token {
+	index := c.Index
+
+	if index >= c.Count && dir < 0 {
+		index = c.Count - 1
+	}
+
+	if dir < -1 {
+		dir = -1
+		index--
+	}
+
+	for i := index; i >= 0 && i < c.Count; i += dir {
+		token := c.Tokens[i]
+
+		switch token.Type {
+		case TokenSpace, TokenNewLine, TokenEmptyLines, TokenInvalid:
+			continue
+		default:
+			return token
+		}
+	}
+
+	return nil
+}
+
+func (c *Cursor) PickNext() *Token {
+	return c.PickClosestTextToken(+1)
+}
+
+func (c *Cursor) PickPrev() *Token {
+	return c.PickClosestTextToken(-1)
+}
+
+func (c *Cursor) PickPrevSkipCur() *Token {
+	return c.PickClosestTextToken(-2)
+}
+
 func (c *Cursor) IsNext(t TokenType) bool {
 	for i := c.Index + 1; i < c.Count; i++ {
 		token := c.Tokens[i]

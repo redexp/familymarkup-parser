@@ -26,15 +26,14 @@ type Family struct {
 
 type Relation struct {
 	Loc
-	Sources  *Persons
+	Sources  *RelList
 	Arrow    *Token
 	Label    *Token
 	Comments []*Token
-	Targets  *Persons
+	Targets  *RelList
 }
 
-type Persons struct {
-	Loc
+type RelList struct {
 	Persons    []*Person
 	Separators []*Token
 }
