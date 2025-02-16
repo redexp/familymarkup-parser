@@ -96,6 +96,7 @@ func Lexer(src string) (list []*Token) {
 	chars := 0
 	var prev *Token
 	leftOpen := false
+	hasFamilyName := false
 
 	for offset < length {
 		var token *Token
@@ -169,7 +170,7 @@ func Lexer(src string) (list []*Token) {
 		case TokenEmptyLines:
 			line += strings.Count(token.Text, "\n")
 
-			checkFamilyName(list)
+			hasFamilyName = checkFamilyName(list)
 		}
 
 		if leftOpen {
@@ -199,6 +200,10 @@ func Lexer(src string) (list []*Token) {
 		}
 
 		offset = prev.End()
+	}
+
+	if !hasFamilyName {
+		checkFamilyName(list)
 	}
 
 	return
@@ -265,22 +270,22 @@ func mergeTokens(list []*Token, prevTokens []*Token, token *Token, src string) [
 	return list[:len(list)-count]
 }
 
-func checkFamilyName(list []*Token) {
+func checkFamilyName(list []*Token) bool {
 	tokens, breakToken := getPrevTokens(list, -1, []TokenType{TokenComment, TokenInvalid, TokenNewLine})
 
 	if breakToken == nil || breakToken.Type == TokenEmptyLines {
-		return
+		return false
 	}
 
 	tokens, breakToken = getPrevTokens(list, -len(tokens)-1, []TokenType{TokenName, TokenSurname, TokenBracket, TokenPunctuation, TokenComment, TokenInvalid})
 
 	if breakToken != nil && breakToken.Type != TokenEmptyLines {
-		return
+		return false
 	}
 
 	for _, token := range tokens {
 		if token.Type == TokenPunctuation && token.SubType != TokenComma {
-			return
+			return false
 		}
 	}
 
@@ -291,6 +296,8 @@ func checkFamilyName(list []*Token) {
 
 		token.Type = TokenSurname
 	}
+
+	return true
 }
 
 func checkSurname(list []*Token, token *Token) {

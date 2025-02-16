@@ -391,6 +391,57 @@ func TestAlias(t *testing.T) {
 	}
 }
 
+func TestNameOnly(t *testing.T) {
+	list := []Token{
+		{
+			Type: TokenSurname,
+			Text: "Name",
+		},
+		{
+			Type: TokenSpace,
+			Text: " ",
+		},
+		{
+			Type:    TokenBracket,
+			SubType: TokenBracketLeft,
+			Text:    "(",
+		},
+		{
+			Type:    TokenSurname,
+			SubType: TokenAlias,
+			Text:    "Alias",
+		},
+		{
+			Type:    TokenBracket,
+			SubType: TokenBracketRight,
+			Text:    ")",
+		},
+	}
+
+	var b strings.Builder
+
+	for _, token := range list {
+		b.WriteString(token.Text)
+	}
+
+	tokens := Lexer(b.String())
+
+	if len(tokens) != len(list) {
+		t.Errorf("Invalid tokens length %d, expect %d", len(tokens), len(list))
+		return
+	}
+
+	for i, token := range tokens {
+		item := list[i]
+
+		if token.Type != item.Type {
+			t.Errorf("Token %d - Invalid type %s, expect %s", i, token.Type.String(), item.Type.String())
+		} else if token.Text != item.Text {
+			t.Errorf("Token %d - Invalid text %s, expect %s", i, token.Text, item.Text)
+		}
+	}
+}
+
 func testFilesIter(t *testing.T) iter.Seq2[string, string] {
 	return func(yield func(string, string) bool) {
 		_, currentFile, _, ok := runtime.Caller(0)

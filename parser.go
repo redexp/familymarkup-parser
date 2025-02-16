@@ -16,11 +16,6 @@ func visitRoot(c *Cursor) *Root {
 
 	for token := range c.Iter() {
 		switch token.Type {
-		case TokenName, TokenSurname:
-			f := visitFamily(c)
-			root.Families = append(root.Families, f)
-			c.StepBackIfNotEnd()
-
 		case TokenComment:
 			root.Comments = append(root.Comments, token)
 
@@ -28,7 +23,9 @@ func visitRoot(c *Cursor) *Root {
 			continue
 
 		default:
-			token.ErrType = ErrUnexpected
+			f := visitFamily(c)
+			root.Families = append(root.Families, f)
+			c.StepBackIfNotEnd()
 		}
 	}
 
@@ -251,6 +248,6 @@ func toPos(token *Token) Position {
 func toEndPos(token *Token) Position {
 	return Position{
 		Line: token.Line,
-		Char: token.EndChar() + 1,
+		Char: token.EndChar(),
 	}
 }

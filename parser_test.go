@@ -20,10 +20,10 @@ func TestParser(t *testing.T) {
 	root := Parser(text)
 
 	g.Expect(root).To(testPoint(Fields{
-		"Loc": testLoc(2, 0, 23, 19),
+		"Loc": testLoc(2, 0, 23, 18),
 		"Families": testArr(
 			testPoint(Fields{
-				"Loc":     testLoc(5, 0, 18, 19),
+				"Loc":     testLoc(5, 0, 18, 18),
 				"Name":    testToken("Family"),
 				"Aliases": testTokens("Alias", "Alias2"),
 				"Comments": testTokens(
@@ -33,14 +33,14 @@ func TestParser(t *testing.T) {
 				),
 				"Relations": testArr(
 					testPoint(Fields{
-						"Loc": testLoc(10, 0, 10, 13),
+						"Loc": testLoc(10, 0, 10, 12),
 						"Sources": testPoint(Fields{
 							"Persons":    testPersons("Name", "Name2"),
 							"Separators": testTokens("+"),
 						}),
 					}),
 					testPoint(Fields{
-						"Loc": testLoc(12, 2, 12, 43),
+						"Loc": testLoc(12, 2, 12, 42),
 						"Sources": testPoint(Fields{
 							"Persons":    testPersons("Name3", "Name4"),
 							"Separators": testTokens("+"),
@@ -50,7 +50,7 @@ func TestParser(t *testing.T) {
 						"Comments": testTokens("# relation comment"),
 					}),
 					testPoint(Fields{
-						"Loc": testLoc(14, 0, 16, 6),
+						"Loc": testLoc(14, 0, 16, 5),
 						"Sources": testPoint(Fields{
 							"Persons":    testPersons("Name5", "mother?"),
 							"Separators": testTokens("+"),
@@ -73,7 +73,7 @@ func TestParser(t *testing.T) {
 				),
 			}),
 			testPoint(Fields{
-				"Loc":      testLoc(20, 2, 23, 19),
+				"Loc":      testLoc(20, 2, 23, 18),
 				"Name":     testToken("Family2"),
 				"Comments": testTokens("* Family2 comment"),
 				"Relations": testArr(
@@ -81,11 +81,11 @@ func TestParser(t *testing.T) {
 						"Sources": testPoint(Fields{
 							"Persons": testArr(
 								testPoint(Fields{
-									"Loc":     testLoc(22, 0, 22, 9),
+									"Loc":     testLoc(22, 0, 22, 8),
 									"Unknown": testToken("unknown?"),
 								}),
 								testPoint(Fields{
-									"Loc":  testLoc(22, 11, 22, 17),
+									"Loc":  testLoc(22, 11, 22, 16),
 									"Name": testToken("Name1"),
 								}),
 							),
@@ -97,6 +97,53 @@ func TestParser(t *testing.T) {
 						"Comments": testTokens("* relation comment"),
 					}),
 				),
+			}),
+		),
+	}))
+}
+
+func TestNameless(t *testing.T) {
+	g := NewWithT(t)
+
+	text := testFile("nameless.family")
+
+	root := Parser(text)
+
+	g.Expect(root).To(testPoint(Fields{
+		"Loc": testLoc(0, 0, 2, 13),
+		"Families": testArr(
+			testPoint(Fields{
+				"Loc":  testLoc(0, 0, 2, 13),
+				"Name": BeNil(),
+				"Relations": testArr(
+					testPoint(Fields{
+						"Loc": testLoc(0, 0, 0, 12),
+						"Sources": testPoint(Fields{
+							"Persons":    testPersons("Name", "Name2"),
+							"Separators": testTokens("+"),
+						}),
+					}),
+					testPoint(Fields{
+						"Loc": testLoc(2, 0, 2, 13),
+						"Sources": testPoint(Fields{
+							"Persons":    testPersons("Name3", "Name4"),
+							"Separators": testTokens("+"),
+						}),
+					}),
+				),
+			}),
+		),
+	}))
+
+	root = Parser("Nameless (Alias, Alias2)")
+
+	g.Expect(root).To(testPoint(Fields{
+		"Loc": testLoc(0, 0, 0, 24),
+		"Families": testArr(
+			testPoint(Fields{
+				"Loc":     testLoc(0, 0, 0, 24),
+				"Name":    testToken("Nameless"),
+				"Aliases": testTokens("Alias", "Alias2"),
 			}),
 		),
 	}))
