@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"unicode/utf8"
 )
 
@@ -96,7 +98,8 @@ func Lexer(src string) (list []*Token) {
 	chars := 0
 	var prev *Token
 	leftOpen := false
-	hasFamilyName := false
+	hasFamilyName := int32(0)
+	var wg sync.WaitGroup
 
 	for offset < length {
 		var token *Token
@@ -170,7 +173,16 @@ func Lexer(src string) (list []*Token) {
 		case TokenEmptyLines:
 			line += strings.Count(token.Text, "\n")
 
-			hasFamilyName = checkFamilyName(list)
+			wg.Add(1)
+			go func(list []*Token) {
+				defer wg.Done()
+
+				has := checkFamilyName(list)
+
+				if has {
+					atomic.CompareAndSwapInt32(&hasFamilyName, 0, 1)
+				}
+			}(list)
 		}
 
 		if leftOpen {
@@ -202,7 +214,9 @@ func Lexer(src string) (list []*Token) {
 		offset = prev.End()
 	}
 
-	if !hasFamilyName {
+	wg.Wait()
+
+	if hasFamilyName == 0 {
 		checkFamilyName(list)
 	}
 
@@ -277,7 +291,14 @@ func checkFamilyName(list []*Token) bool {
 		return false
 	}
 
-	tokens, breakToken = getPrevTokens(list, -len(tokens)-1, []TokenType{TokenName, TokenSurname, TokenBracket, TokenPunctuation, TokenComment, TokenInvalid})
+	total := len(tokens)
+
+	tokens, breakToken = getPrevTokens(list, -total-1, []TokenType{TokenName, TokenSurname, TokenBracket, TokenPunctuation, TokenComment, TokenInvalid})
+
+	if breakToken != nil && breakToken.Type == TokenNewLine {
+		total += len(tokens)
+		_, breakToken = getPrevTokens(list, -total-1, []TokenType{TokenComment, TokenNewLine})
+	}
 
 	if breakToken != nil && breakToken.Type != TokenEmptyLines {
 		return false

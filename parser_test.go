@@ -21,6 +21,11 @@ func TestParser(t *testing.T) {
 
 	g.Expect(root).To(testPoint(Fields{
 		"Loc": testLoc(2, 0, 23, 18),
+		"Comments": testTokens(
+			"* root comment",
+			"# root comment 2",
+			"// root comment 3",
+		),
 		"Families": testArr(
 			testPoint(Fields{
 				"Loc":     testLoc(5, 0, 18, 18),
