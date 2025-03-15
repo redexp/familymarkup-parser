@@ -98,7 +98,7 @@ func Lexer(src string) (list []*Token) {
 	chars := 0
 	var prev *Token
 	leftOpen := false
-	hasFamilyName := int32(0)
+	hasFamilyName := atomic.Bool{}
 	var wg sync.WaitGroup
 
 	for offset < length {
@@ -180,7 +180,7 @@ func Lexer(src string) (list []*Token) {
 				has := checkFamilyName(list)
 
 				if has {
-					atomic.CompareAndSwapInt32(&hasFamilyName, 0, 1)
+					hasFamilyName.Store(true)
 				}
 			}(list)
 		}
@@ -216,7 +216,7 @@ func Lexer(src string) (list []*Token) {
 
 	wg.Wait()
 
-	if hasFamilyName == 0 {
+	if !hasFamilyName.Load() {
 		checkFamilyName(list)
 	}
 
