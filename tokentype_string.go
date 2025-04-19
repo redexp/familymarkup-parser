@@ -10,35 +10,54 @@ func _() {
 	var x [1]struct{}
 	_ = x[TokenName-1]
 	_ = x[TokenSurname-2]
-	_ = x[TokenAlias-3]
-	_ = x[TokenUnknown-4]
-	_ = x[TokenWord-5]
-	_ = x[TokenNum-6]
-	_ = x[TokenArrow-7]
-	_ = x[TokenEqual-8]
-	_ = x[TokenPunctuation-9]
-	_ = x[TokenPlus-10]
-	_ = x[TokenComma-11]
-	_ = x[TokenBracket-12]
-	_ = x[TokenBracketLeft-13]
-	_ = x[TokenBracketRight-14]
-	_ = x[TokenComment-15]
-	_ = x[TokenSpace-16]
-	_ = x[TokenEmptyLines-17]
-	_ = x[TokenNewLine-18]
-	_ = x[TokenInvalid-19]
+	_ = x[TokenAlias-4]
+	_ = x[TokenUnknown-8]
+	_ = x[TokenWord-16]
+	_ = x[TokenNum-32]
+	_ = x[TokenArrow-64]
+	_ = x[TokenEqual-128]
+	_ = x[TokenPunctuation-256]
+	_ = x[TokenPlus-512]
+	_ = x[TokenComma-1024]
+	_ = x[TokenBracket-2048]
+	_ = x[TokenBracketLeft-4096]
+	_ = x[TokenBracketRight-8192]
+	_ = x[TokenComment-16384]
+	_ = x[TokenSpace-32768]
+	_ = x[TokenEmptyLines-65536]
+	_ = x[TokenNewLine-131072]
+	_ = x[TokenInvalid-262144]
 }
 
 const _TokenType_name = "TokenNameTokenSurnameTokenAliasTokenUnknownTokenWordTokenNumTokenArrowTokenEqualTokenPunctuationTokenPlusTokenCommaTokenBracketTokenBracketLeftTokenBracketRightTokenCommentTokenSpaceTokenEmptyLinesTokenNewLineTokenInvalid"
 
-var _TokenType_index = [...]uint8{0, 9, 21, 31, 43, 52, 60, 70, 80, 96, 105, 115, 127, 143, 160, 172, 182, 197, 209, 221}
+var _TokenType_map = map[TokenType]string{
+	1:      _TokenType_name[0:9],
+	2:      _TokenType_name[9:21],
+	4:      _TokenType_name[21:31],
+	8:      _TokenType_name[31:43],
+	16:     _TokenType_name[43:52],
+	32:     _TokenType_name[52:60],
+	64:     _TokenType_name[60:70],
+	128:    _TokenType_name[70:80],
+	256:    _TokenType_name[80:96],
+	512:    _TokenType_name[96:105],
+	1024:   _TokenType_name[105:115],
+	2048:   _TokenType_name[115:127],
+	4096:   _TokenType_name[127:143],
+	8192:   _TokenType_name[143:160],
+	16384:  _TokenType_name[160:172],
+	32768:  _TokenType_name[172:182],
+	65536:  _TokenType_name[182:197],
+	131072: _TokenType_name[197:209],
+	262144: _TokenType_name[209:221],
+}
 
 func (i TokenType) String() string {
-	i -= 1
-	if i < 0 || i >= TokenType(len(_TokenType_index)-1) {
-		return "TokenType(" + strconv.FormatInt(int64(i+1), 10) + ")"
+	if str, ok := _TokenType_map[i]; ok {
+		return str
 	}
-	return _TokenType_name[_TokenType_index[i]:_TokenType_index[i+1]]
+	return "TokenType(" + strconv.FormatInt(int64(i), 10) + ")"
 }
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.

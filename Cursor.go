@@ -2,7 +2,6 @@ package parser
 
 import (
 	"iter"
-	"slices"
 )
 
 type Cursor struct {
@@ -35,13 +34,13 @@ func (c *Cursor) Iter() iter.Seq[*Token] {
 	}
 }
 
-func (c *Cursor) GetAllNext(validTokens []TokenType) (tokens []*Token) {
+func (c *Cursor) GetAllNext(validTokens TokenType) (tokens []*Token) {
 	defer c.StepBackIfNotEnd()
 
 	for c.Index++; c.Index < c.Count; c.Index++ {
 		token := c.Tokens[c.Index]
 
-		if !slices.Contains(validTokens, token.Type) && !slices.Contains(validTokens, token.SubType) {
+		if validTokens&token.Type == 0 && validTokens&token.SubType == 0 {
 			return
 		}
 

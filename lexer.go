@@ -2,7 +2,6 @@ package parser
 
 import (
 	"regexp"
-	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -230,7 +229,7 @@ func mergeUnknown(list []*Token, token *Token, src string) []*Token {
 		return list
 	}
 
-	prevTokens, breakToken := getPrevTokens(list, -1, []TokenType{TokenName, TokenWord})
+	prevTokens, breakToken := getPrevTokens(list, -1, TokenName|TokenWord)
 	prevCount := len(prevTokens)
 
 	if prevCount == 0 {
@@ -238,7 +237,7 @@ func mergeUnknown(list []*Token, token *Token, src string) []*Token {
 	}
 
 	if breakToken != nil && (breakToken.Type == TokenArrow || breakToken.Type == TokenEqual) {
-		nextTokens := getNextTokens(prevTokens, 0, []TokenType{TokenWord})
+		nextTokens := getNextTokens(prevTokens, 0, TokenWord)
 		count := len(nextTokens)
 
 		if count > 0 {
@@ -260,7 +259,7 @@ func mergeWords(list []*Token, token *Token, src string) []*Token {
 		return list
 	}
 
-	prevTokens, _ := getPrevTokens(list, -1, []TokenType{TokenWord})
+	prevTokens, _ := getPrevTokens(list, -1, TokenWord)
 
 	return mergeTokens(list, prevTokens, token, src)
 }
@@ -285,7 +284,7 @@ func mergeTokens(list []*Token, prevTokens []*Token, token *Token, src string) [
 }
 
 func checkFamilyName(list []*Token) bool {
-	tokens, breakToken := getPrevTokens(list, -1, []TokenType{TokenComment, TokenInvalid, TokenNewLine})
+	tokens, breakToken := getPrevTokens(list, -1, TokenComment|TokenInvalid|TokenNewLine)
 
 	if breakToken == nil || breakToken.Type == TokenEmptyLines {
 		return false
@@ -293,11 +292,11 @@ func checkFamilyName(list []*Token) bool {
 
 	total := len(tokens)
 
-	tokens, breakToken = getPrevTokens(list, -total-1, []TokenType{TokenName, TokenSurname, TokenBracket, TokenPunctuation, TokenComment, TokenInvalid})
+	tokens, breakToken = getPrevTokens(list, -total-1, TokenName|TokenSurname|TokenBracket|TokenPunctuation|TokenComment|TokenInvalid)
 
 	if breakToken != nil && breakToken.Type == TokenNewLine {
 		total += len(tokens)
-		_, breakToken = getPrevTokens(list, -total-1, []TokenType{TokenComment, TokenNewLine})
+		_, breakToken = getPrevTokens(list, -total-1, TokenComment|TokenNewLine)
 	}
 
 	if breakToken != nil && breakToken.Type != TokenEmptyLines {
@@ -322,7 +321,7 @@ func checkFamilyName(list []*Token) bool {
 }
 
 func checkSurname(list []*Token, token *Token) {
-	tokens, breakToken := getPrevTokens(list, -1, []TokenType{TokenName, TokenSurname})
+	tokens, breakToken := getPrevTokens(list, -1, TokenName|TokenSurname)
 
 	for _, token := range tokens {
 		if token.Type == TokenSurname {
@@ -339,14 +338,14 @@ func checkSurname(list []*Token, token *Token) {
 		return
 	}
 
-	tokens, _ = getPrevTokens(cutAliasesRight(list), -1, []TokenType{TokenName})
+	tokens, _ = getPrevTokens(cutAliasesRight(list), -1, TokenName)
 
 	if len(tokens) > 0 {
 		token.Type = TokenSurname
 	}
 }
 
-func getPrevTokens(list []*Token, start int, validTokens []TokenType) ([]*Token, *Token) {
+func getPrevTokens(list []*Token, start int, validTokens TokenType) ([]*Token, *Token) {
 	count := len(list)
 
 	if count == 0 {
@@ -367,7 +366,7 @@ func getPrevTokens(list []*Token, start int, validTokens []TokenType) ([]*Token,
 			continue
 		}
 
-		if !slices.Contains(validTokens, t) {
+		if validTokens&t == 0 {
 			breakToken = list[index]
 			index++
 			break
@@ -393,7 +392,7 @@ func getPrevTokens(list []*Token, start int, validTokens []TokenType) ([]*Token,
 	return list[index : start+1], breakToken
 }
 
-func getNextTokens(list []*Token, start int, validTokens []TokenType) []*Token {
+func getNextTokens(list []*Token, start int, validTokens TokenType) []*Token {
 	count := len(list)
 
 	if count == 0 {
@@ -409,7 +408,7 @@ func getNextTokens(list []*Token, start int, validTokens []TokenType) []*Token {
 			continue
 		}
 
-		if !slices.Contains(validTokens, t) {
+		if validTokens&t == 0 {
 			index--
 			break
 		}

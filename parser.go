@@ -48,7 +48,7 @@ func visitFamily(c *Cursor) (family *Family) {
 
 			family.Name = token
 
-			tokens := c.GetAllNext([]TokenType{TokenSurname, TokenBracket, TokenPunctuation, TokenSpace, TokenInvalid})
+			tokens := c.GetAllNext(TokenSurname | TokenBracket | TokenPunctuation | TokenSpace | TokenInvalid)
 
 			for _, token := range tokens {
 				if token.SubType == TokenAlias {
@@ -118,7 +118,7 @@ func visitRelation(c *Cursor) (rel *Relation) {
 			rel.Targets = &RelList{}
 			list = rel.Targets
 
-			tokens := c.GetAllNext([]TokenType{TokenSpace, TokenWord})
+			tokens := c.GetAllNext(TokenSpace | TokenWord)
 
 			for _, token := range tokens {
 				if token.Type == TokenWord {
@@ -191,7 +191,7 @@ func visitPerson(c *Cursor) (p *Person) {
 				continue
 			}
 
-			tokens := c.GetAllNext([]TokenType{TokenAlias, TokenComma, TokenSpace})
+			tokens := c.GetAllNext(TokenAlias | TokenComma | TokenSpace)
 
 			for _, token := range tokens {
 				if token.SubType == TokenAlias {
@@ -208,7 +208,7 @@ func visitPerson(c *Cursor) (p *Person) {
 				return
 			}
 
-			tokens := c.GetAllNext([]TokenType{TokenComment, TokenNewLine, TokenSpace})
+			tokens := c.GetAllNext(TokenComment | TokenNewLine | TokenSpace)
 
 			p.End = toEndPos(c.PickPrev())
 

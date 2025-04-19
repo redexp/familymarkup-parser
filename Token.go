@@ -5,31 +5,31 @@ package parser
 type TokenType int
 
 const (
-	TokenName TokenType = iota + 1
-	TokenSurname
-	TokenAlias
-	TokenUnknown
-	TokenWord
-	TokenNum
-	TokenArrow
-	TokenEqual
-	TokenPunctuation
-	TokenPlus
-	TokenComma
-	TokenBracket
-	TokenBracketLeft
-	TokenBracketRight
-	TokenComment
-	TokenSpace
-	TokenEmptyLines
-	TokenNewLine
-	TokenInvalid
+	TokenName         TokenType = 1 << iota // 1
+	TokenSurname                            // 2
+	TokenAlias                              // 4
+	TokenUnknown                            // 8
+	TokenWord                               // 16
+	TokenNum                                // 32
+	TokenArrow                              // 64
+	TokenEqual                              // 128
+	TokenPunctuation                        // 256
+	TokenPlus                               // 512
+	TokenComma                              // 1024
+	TokenBracket                            // 2048
+	TokenBracketLeft                        // 4096
+	TokenBracketRight                       // 8192
+	TokenComment                            // 16384
+	TokenSpace                              // 32768
+	TokenEmptyLines                         // 65536
+	TokenNewLine                            // 131072
+	TokenInvalid                            // 262144
 )
 
 type ErrType int
 
 const (
-	ErrUnexpected ErrType = iota + 1
+	ErrUnexpected ErrType = 1 << iota
 )
 
 type Token struct {
