@@ -40,6 +40,7 @@ func TestParser(t *testing.T) {
 					testPoint(Fields{
 						"Loc": testLoc(10, 0, 10, 12),
 						"Sources": testPoint(Fields{
+							"Loc":        testLoc(10, 0, 10, 12),
 							"Persons":    testPersons("Name", "Name2"),
 							"Separators": testTokens("+"),
 						}),
@@ -47,6 +48,7 @@ func TestParser(t *testing.T) {
 					testPoint(Fields{
 						"Loc": testLoc(12, 2, 12, 42),
 						"Sources": testPoint(Fields{
+							"Loc":        testLoc(12, 2, 12, 15),
 							"Persons":    testPersons("Name3", "Name4"),
 							"Separators": testTokens("+"),
 						}),
@@ -57,6 +59,7 @@ func TestParser(t *testing.T) {
 					testPoint(Fields{
 						"Loc": testLoc(14, 0, 16, 5),
 						"Sources": testPoint(Fields{
+							"Loc":        testLoc(14, 0, 14, 15),
 							"Persons":    testPersons("Name5", "mother?"),
 							"Separators": testTokens("+"),
 						}),

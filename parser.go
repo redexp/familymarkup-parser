@@ -90,13 +90,25 @@ func visitRelation(c *Cursor) (rel *Relation) {
 
 	rel.Start = toPos(c.PickNext())
 
-	list := rel.Sources
-
 	defer func() {
 		if rel.Targets != nil && len(rel.Targets.Persons) == 0 && len(rel.Targets.Separators) == 0 {
 			rel.Targets = nil
 		}
+
+		for _, list := range []*RelList{rel.Sources, rel.Targets} {
+			if list == nil || len(list.Persons) == 0 {
+				continue
+			}
+
+			first := list.Persons[0]
+			last := list.Persons[len(list.Persons)-1]
+
+			list.Start = first.Start
+			list.End = last.End
+		}
 	}()
+
+	list := rel.Sources
 
 	for token := range c.Iter() {
 		switch token.Type {

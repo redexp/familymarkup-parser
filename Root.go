@@ -34,6 +34,7 @@ type Relation struct {
 }
 
 type RelList struct {
+	Loc
 	Persons    []*Person
 	Separators []*Token
 }
