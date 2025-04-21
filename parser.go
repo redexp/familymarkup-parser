@@ -1,7 +1,11 @@
 package parser
 
-func Parser(src string) *Root {
-	return visitRoot(NewCursor(Lexer(src)))
+func Parse(src string) *Root {
+	return ParseTokens(Lexer(src))
+}
+
+func ParseTokens(tokens []*Token) *Root {
+	return visitRoot(NewCursor(tokens))
 }
 
 func visitRoot(c *Cursor) *Root {

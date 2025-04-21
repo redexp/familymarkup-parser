@@ -17,7 +17,7 @@ func TestParser(t *testing.T) {
 
 	text := testFile("main.fml")
 
-	root := Parser(text)
+	root := Parse(text)
 
 	g.Expect(root).To(testPoint(Fields{
 		"Loc": testLoc(2, 0, 23, 18),
@@ -115,7 +115,7 @@ func TestNameless(t *testing.T) {
 
 	text := testFile("nameless.family")
 
-	root := Parser(text)
+	root := Parse(text)
 
 	g.Expect(root).To(testPoint(Fields{
 		"Loc": testLoc(0, 0, 2, 13),
@@ -143,7 +143,7 @@ func TestNameless(t *testing.T) {
 		),
 	}))
 
-	root = Parser("Nameless (Alias, Alias2)")
+	root = Parse("Nameless (Alias, Alias2)")
 
 	g.Expect(root).To(testPoint(Fields{
 		"Loc": testLoc(0, 0, 0, 24),
