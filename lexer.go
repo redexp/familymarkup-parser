@@ -16,12 +16,14 @@ type Rule struct {
 
 var rules []Rule = []Rule{
 	{
-		Type:   TokenEmptyLines,
-		Regexp: regexp.MustCompile(`^\r?\n[\r\n\t ]*\n`),
+		Type:    TokenEmptyLines,
+		SubType: TokenNewLine,
+		Regexp:  regexp.MustCompile(`^\r?\n[\r\n\t ]*\n`),
 	},
 	{
-		Type:   TokenNewLine,
-		Regexp: regexp.MustCompile(`^\r?\n`),
+		Type:    TokenNewLine,
+		SubType: TokenNewLine,
+		Regexp:  regexp.MustCompile(`^\r?\n`),
 	},
 	{
 		Type:   TokenSpace,

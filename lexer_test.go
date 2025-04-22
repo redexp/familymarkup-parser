@@ -51,6 +51,7 @@ func TestLexer(t *testing.T) {
 		},
 		{
 			Type:     TokenEmptyLines,
+			SubType:  TokenNewLine,
 			Text:     "\n \n",
 			Line:     0,
 			Char:     11,
@@ -162,6 +163,7 @@ func TestLexer(t *testing.T) {
 		},
 		{
 			Type:     TokenNewLine,
+			SubType:  TokenNewLine,
 			Text:     "\n",
 			Line:     2,
 			Char:     35,
@@ -232,6 +234,7 @@ func TestLexer(t *testing.T) {
 		},
 		{
 			Type:     TokenNewLine,
+			SubType:  TokenNewLine,
 			Text:     "\n",
 			Line:     3,
 			Char:     44,
@@ -292,6 +295,7 @@ func TestLexer(t *testing.T) {
 		},
 		{
 			Type:     TokenNewLine,
+			SubType:  TokenNewLine,
 			Text:     "\n",
 			Line:     4,
 			Char:     13,
