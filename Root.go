@@ -47,4 +47,5 @@ type Person struct {
 	Aliases  []*Token
 	Surname  *Token
 	Comments []*Token
+	IsChild  bool
 }

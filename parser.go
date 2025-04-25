@@ -100,15 +100,30 @@ func visitRelation(c *Cursor) (rel *Relation) {
 		}
 
 		for _, list := range []*RelList{rel.Sources, rel.Targets} {
-			if list == nil || len(list.Persons) == 0 {
+			if list == nil {
 				continue
 			}
 
-			first := list.Persons[0]
-			last := list.Persons[len(list.Persons)-1]
+			persons := list.Persons
+			count := len(persons)
+
+			if count == 0 {
+				continue
+			}
+
+			first := persons[0]
+			last := persons[count-1]
 
 			list.Start = first.Start
 			list.End = last.End
+		}
+
+		if rel.Targets != nil {
+			isChild := rel.Arrow != nil && rel.Arrow.SubType == TokenEqual
+
+			for _, person := range rel.Targets.Persons {
+				person.IsChild = isChild
+			}
 		}
 	}()
 
