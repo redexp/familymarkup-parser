@@ -51,3 +51,16 @@ func (token *Token) End() int {
 func (token *Token) EndChar() int {
 	return token.Char + token.CharsNum
 }
+
+func (token *Token) Loc() Loc {
+	return Loc{
+		Start: Position{
+			Line: token.Line,
+			Char: token.Char,
+		},
+		End: Position{
+			Line: token.Line,
+			Char: token.EndChar(),
+		},
+	}
+}
