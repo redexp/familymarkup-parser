@@ -64,3 +64,7 @@ func (token *Token) Loc() Loc {
 		},
 	}
 }
+
+func (token *Token) IsOnPosition(line, char int) bool {
+	return token.Line == line && token.Char >= char && char < token.EndChar()
+}
