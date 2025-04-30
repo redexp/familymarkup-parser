@@ -26,11 +26,12 @@ type Family struct {
 
 type Relation struct {
 	Loc
-	Sources  *RelList
-	Arrow    *Token
-	Label    *Token
-	Comments []*Token
-	Targets  *RelList
+	Sources     *RelList
+	Arrow       *Token
+	IsFamilyDef bool
+	Label       *Token
+	Comments    []*Token
+	Targets     *RelList
 }
 
 type RelList struct {

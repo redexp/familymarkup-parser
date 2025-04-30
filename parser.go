@@ -118,11 +118,11 @@ func visitRelation(c *Cursor) (rel *Relation) {
 			list.End = last.End
 		}
 
-		if rel.Targets != nil {
-			isChild := rel.Arrow != nil && rel.Arrow.SubType == TokenEqual
+		rel.IsFamilyDef = rel.Arrow != nil && rel.Arrow.SubType == TokenEqual
 
+		if rel.Targets != nil && rel.IsFamilyDef {
 			for _, person := range rel.Targets.Persons {
-				person.IsChild = isChild
+				person.IsChild = true
 			}
 		}
 	}()
