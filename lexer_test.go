@@ -446,6 +446,82 @@ func TestNameOnly(t *testing.T) {
 	}
 }
 
+func TestLocOverlap(t *testing.T) {
+	type LocTest struct {
+		A Loc
+		B Loc
+		T OverlapType
+	}
+
+	init := func(sl, sc, el, ec int) Loc {
+		return Loc{
+			Start: Position{
+				Line: sl,
+				Char: sc,
+			},
+			End: Position{
+				Line: el,
+				Char: ec,
+			},
+		}
+	}
+
+	list := []LocTest{
+		{
+			A: init(0, 0, 1, 10),
+			B: init(2, 0, 3, 0),
+			T: OverlapBefore,
+		},
+		{
+			A: init(0, 0, 1, 10),
+			B: init(1, 10, 3, 0),
+			T: OverlapBefore,
+		},
+		{
+			B: init(0, 0, 1, 10),
+			A: init(2, 0, 3, 0),
+			T: OverlapAfter,
+		},
+		{
+			A: init(1, 10, 3, 0),
+			B: init(0, 0, 1, 10),
+			T: OverlapAfter,
+		},
+		{
+			A: init(0, 0, 1, 10),
+			B: init(1, 9, 3, 0),
+			T: OverlapByEnd,
+		},
+		{
+			A: init(1, 9, 3, 0),
+			B: init(0, 0, 1, 10),
+			T: OverlapByStart,
+		},
+		{
+			A: init(0, 0, 4, 10),
+			B: init(1, 9, 3, 0),
+			T: OverlapOuter,
+		},
+		{
+			B: init(0, 0, 4, 10),
+			A: init(1, 9, 3, 0),
+			T: OverlapInner,
+		},
+	}
+
+	for i, item := range list {
+		res := item.A.OverlapType(item.B)
+
+		if res != item.T {
+			t.Errorf(`%d: expect type %d, got %d`, i, item.T, res)
+		}
+
+		if res != OverlapBefore && res != OverlapAfter && !item.A.Overlaps(item.B) {
+			t.Errorf(`%d: expect Overlaps == true`, i)
+		}
+	}
+}
+
 func testFilesIter(t *testing.T) iter.Seq2[string, string] {
 	return func(yield func(string, string) bool) {
 		_, currentFile, _, ok := runtime.Caller(0)

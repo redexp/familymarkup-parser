@@ -6,16 +6,6 @@ type Root struct {
 	Comments []*Token
 }
 
-type Loc struct {
-	Start Position
-	End   Position
-}
-
-type Position struct {
-	Line int
-	Char int
-}
-
 type Family struct {
 	Loc
 	Name      *Token
