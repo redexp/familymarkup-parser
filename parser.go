@@ -42,6 +42,12 @@ func visitFamily(c *Cursor) (family *Family) {
 	family = &Family{}
 	family.Start = toPos(c.PickNext())
 
+	defer func() {
+		for _, rel := range family.Relations {
+			rel.Family = family
+		}
+	}()
+
 	for token := range c.Iter() {
 		switch token.Type {
 		case TokenSurname:
@@ -99,7 +105,7 @@ func visitRelation(c *Cursor) (rel *Relation) {
 			rel.Targets = nil
 		}
 
-		for _, list := range []*RelList{rel.Sources, rel.Targets} {
+		for side, list := range []*RelList{rel.Sources, rel.Targets} {
 			if list == nil {
 				continue
 			}
@@ -116,6 +122,12 @@ func visitRelation(c *Cursor) (rel *Relation) {
 
 			list.Start = first.Start
 			list.End = last.End
+
+			for i, person := range persons {
+				person.Side = SideType(side)
+				person.Index = i
+				person.Relation = rel
+			}
 		}
 
 		rel.IsFamilyDef = rel.Arrow != nil && rel.Arrow.SubType == TokenEqual

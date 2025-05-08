@@ -22,6 +22,8 @@ type Relation struct {
 	Label       *Token
 	Comments    []*Token
 	Targets     *RelList
+
+	Family *Family
 }
 
 type RelList struct {
@@ -38,5 +40,17 @@ type Person struct {
 	Aliases  []*Token
 	Surname  *Token
 	Comments []*Token
-	IsChild  bool
+
+	Side    SideType
+	Index   int
+	IsChild bool
+
+	Relation *Relation
 }
+
+type SideType int
+
+const (
+	SideSources SideType = iota
+	SideTargets
+)
