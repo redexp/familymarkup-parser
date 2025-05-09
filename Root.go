@@ -1,5 +1,7 @@
 package parser
 
+import "iter"
+
 type Root struct {
 	Loc
 	Families []*Family
@@ -54,3 +56,19 @@ const (
 	SideSources SideType = iota
 	SideTargets
 )
+
+func (rel *Relation) PersonsIter() iter.Seq[*Person] {
+	return func(yield func(*Person) bool) {
+		for _, list := range []*RelList{rel.Sources, rel.Targets} {
+			if list == nil {
+				continue
+			}
+
+			for _, person := range list.Persons {
+				if !yield(person) {
+					return
+				}
+			}
+		}
+	}
+}
